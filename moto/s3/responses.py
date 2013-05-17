@@ -81,7 +81,7 @@ def _bucket_response(request, full_url, headers):
                 form[k] = v
                 
         key = form['key']
-        f = form['file']
+        f = request.files['file'].read()
             
         new_key = s3_backend.set_key(bucket_name, key, f)
         
@@ -93,7 +93,7 @@ def _bucket_response(request, full_url, headers):
                 meta_key = result.group(0).lower()
                 metadata = form[form_id]
                 new_key.set_metadata(meta_key, metadata)
-        return 200, headers, ""
+        return 204, headers, ""
     else:
         raise NotImplementedError("Method {} has not been impelemented in the S3 backend yet".format(method))
 
@@ -150,11 +150,14 @@ def _key_response(request, full_url, headers):
             meta_regex = re.compile('^x-amz-meta-([a-zA-Z0-9\-_]+)$', flags=re.IGNORECASE)
             for header in request.headers:
                 if isinstance(header, basestring):
-                    result = meta_regex.match(header)
-                    if result:
-                        meta_key = result.group(0).lower()
-                        metadata = request.headers[header]
-                        new_key.set_metadata(meta_key, metadata)
+                    #Also HTTPretty stuff..
+                    key = header
+                    val = request.headers[header]
+                else:
+                    key, val = header
+                result = meta_regex.match(key)
+                if result:
+                    new_key.set_metadata(key, val)
         template = Template(S3_OBJECT_RESPONSE)
         headers.update(new_key.response_dict)
         return 200, headers, template.render(key=new_key)
