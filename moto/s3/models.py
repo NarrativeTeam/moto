@@ -26,7 +26,7 @@ class FakeKey(object):
     def etag(self):
         value_md5 = md5.new()
         value_md5.update(self.value)
-        return '{0}'.format(value_md5.hexdigest())
+        return '"{0}"'.format(value_md5.hexdigest())
 
     @property
     def last_modified_ISO8601(self):

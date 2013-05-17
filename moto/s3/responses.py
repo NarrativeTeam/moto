@@ -73,15 +73,16 @@ def _bucket_response(request, full_url, headers):
         if hasattr(request, 'form'):
             #Not HTTPretty
             form = request.form
+            f = request.files['file'].read()
         else:
             #HTTPretty, build new form object
             form = {}
             for kv in request.body.split('&'):
                 k, v = kv.split('=')
                 form[k] = v
+            f = form['file']
                 
         key = form['key']
-        f = request.files['file'].read()
             
         new_key = s3_backend.set_key(bucket_name, key, f)
         
