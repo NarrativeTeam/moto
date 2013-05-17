@@ -22,6 +22,10 @@ def bucket_name_from_url(url):
             # No subdomain found.
             return None
 
+def key_name_from_url(url):
+    key_name = urlparse.urlparse(url).path.lstrip('/')
+    return key_name
+
 
 def clean_key_name(key_name):
     return urllib2.unquote(key_name)

@@ -4,7 +4,7 @@ import re
 from jinja2 import Template
 
 from .models import s3_backend
-from .utils import bucket_name_from_url
+from .utils import bucket_name_from_url, key_name_from_url
 
 
 def all_buckets():
@@ -108,10 +108,9 @@ def key_response(request, full_url, headers):
 
 
 def _key_response(request, full_url, headers):
-    parsed_url = urlparse(full_url)
     method = request.method
 
-    key_name = parsed_url.path.lstrip('/')
+    key_name = key_name_from_url(full_url)
     bucket_name = bucket_name_from_url(full_url)
     if hasattr(request, 'body'):
         # Boto
