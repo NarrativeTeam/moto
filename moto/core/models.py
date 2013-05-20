@@ -100,10 +100,22 @@ class BaseBackend(object):
         """
         The url paths that will be used for the flask server
         """
+        url_bases = self._url_module.url_bases
+        unformatted_paths = self._url_module.url_paths
+        
         paths = {}
-        for url_path, handler in self.url_paths.iteritems():
-            url_path = convert_regex_to_flask_path(url_path)
-            paths[url_path] = handler
+        for url_base in url_bases:
+            for url_path, handler in unformatted_paths.iteritems():
+                url = url_path.format(url_base)
+                url = convert_regex_to_flask_path(url)
+                url = url.split('//', 1)[1]
+                host, path = url.split('/', 1)
+                path = "/{0}".format(path)
+                result = {
+                    'handler': handler,
+                    'host': host
+                }
+                paths[path] = result
 
         return paths
 
