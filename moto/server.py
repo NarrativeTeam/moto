@@ -27,8 +27,9 @@ def configure_urls(service):
     from werkzeug.routing import Map
     app.url_map = Map()
     app.url_map.converters['regex'] = RegexConverter
-    for url_path, handler in backend.flask_paths.iteritems():
-        app.route(url_path, methods=HTTP_METHODS)(convert_flask_to_httpretty_response(handler))
+    for url_path, val in backend.flask_paths.iteritems():
+        subdomain = val.get('subdomain', None)
+        app.route(url_path, host=subdomain, methods=HTTP_METHODS)(convert_flask_to_httpretty_response(val['handler']))
 
 
 def main(args=sys.argv):

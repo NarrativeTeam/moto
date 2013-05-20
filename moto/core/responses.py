@@ -8,7 +8,7 @@ from moto.core.utils import camelcase_to_underscores, method_names_from_class
 
 class BaseResponse(object):
 
-    def dispatch(self, request, full_url, headers):
+    def dispatch(self, request, full_url, headers, **kwargs):
         if hasattr(request, 'body'):
             # Boto
             self.body = request.body

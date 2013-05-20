@@ -14,8 +14,11 @@ def all_buckets():
     return template.render(buckets=all_buckets)
 
 
-def bucket_response(request, full_url, headers):
-    response = _bucket_response(request, full_url, headers)
+def bucket_response(request, full_url, headers, **kwargs):
+    bucket_name = kwargs.get('bucket_name', None)
+    if not bucket_name:
+        bucket_name = bucket_name_from_url(full_url)
+    response = _bucket_response(request, full_url, headers, bucket_name)
     if isinstance(response, basestring):
         return 200, headers, response
 
@@ -24,12 +27,11 @@ def bucket_response(request, full_url, headers):
         return status_code, headers, response_content
 
 
-def _bucket_response(request, full_url, headers):
+def _bucket_response(request, full_url, headers, bucket_name):
     parsed_url = urlparse(full_url)
     querystring = parse_qs(parsed_url.query)
     method = request.method
 
-    bucket_name = bucket_name_from_url(full_url)
     if not bucket_name:
         # If no bucket specified, list all buckets
         return all_buckets()
@@ -99,8 +101,13 @@ def _bucket_response(request, full_url, headers):
         raise NotImplementedError("Method {} has not been impelemented in the S3 backend yet".format(method))
 
 
-def key_response(request, full_url, headers):
-    response = _key_response(request, full_url, headers)
+def key_response(request, full_url, headers, **kwargs):
+    bucket_name = kwargs.get('bucket_name', None)
+    key_name = kwargs.get('key_name', None)
+    if not bucket_name:
+        key_name = key_name_from_url(full_url)
+        bucket_name = bucket_name_from_url(full_url)
+    response = _key_response(request, full_url, headers, bucket_name, key_name)
     if isinstance(response, basestring):
         return 200, headers, response
     else:
@@ -108,11 +115,9 @@ def key_response(request, full_url, headers):
         return status_code, headers, response_content
 
 
-def _key_response(request, full_url, headers):
+def _key_response(request, full_url, headers, bucket_name, key_name):
     method = request.method
 
-    key_name = key_name_from_url(full_url)
-    bucket_name = bucket_name_from_url(full_url)
     if hasattr(request, 'body'):
         # Boto
         body = request.body
